@@ -1,7 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
+
+origins = [
+    "https://placegroup.co.kr",  # 워드프레스 사이트 도메인 (페이지 단위가 아니라 도메인만)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 허용할 출처 도메인
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class UserInfo(BaseModel):
     age: int
@@ -9,7 +22,6 @@ class UserInfo(BaseModel):
     job: str
     region: str
 
-# 예시 지원금 규칙 (실제론 더 복잡할 수 있어요)
 support_rules = [
     {
         "조건": lambda u: u.age >= 65,
