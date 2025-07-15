@@ -1,15 +1,17 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "🚗 안녕하세요! 교통사고 진행 도우미입니다."}
+class AccidentRequest(BaseModel):
+    type: str
 
-@app.get("/rule")
-def rule_example(accident_type: str = "접촉사고"):
-    if accident_type == "접촉사고":
-        return {"result": "과실 비율 5:5 또는 6:4 가능성이 높습니다."}
-    elif accident_type == "신호위반":
-        return {"result": "과실 비율 8:2 이상으로 예상됩니다."}
-    return {"result": "알 수 없는 사고 유형입니다."}
+rules = {
+    "후방추돌": "상대방 100% 과실 가능성이 높습니다. 사진과 블랙박스를 확보하세요.",
+    "측면충돌": "과실 비율이 상황에 따라 달라집니다. 상대 차선 변경 여부를 확인하세요."
+}
+
+@app.post("/accident")
+async def process_accident(req: AccidentRequest):
+    result = rules.get(req.type, "해당 사고 유형은 아직 준비 중입니다.")
+    return {"response": result}
