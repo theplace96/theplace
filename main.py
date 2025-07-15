@@ -11,6 +11,10 @@ rules = {
     "측면충돌": "과실 비율이 상황에 따라 달라집니다. 상대 차선 변경 여부를 확인하세요."
 }
 
+@app.get("/")
+async def root():
+    return {"message": "🚗 안녕하세요! 교통사고 진행 도우미입니다."}
+
 @app.post("/accident")
 async def process_accident(req: AccidentRequest):
     result = rules.get(req.type, "해당 사고 유형은 아직 준비 중입니다.")
