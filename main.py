@@ -3,19 +3,35 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class AccidentRequest(BaseModel):
-    type: str
+class UserInfo(BaseModel):
+    age: int
+    income: int
+    job: str
+    region: str
 
-rules = {
-    "후방추돌": "상대방 100% 과실 가능성이 높습니다. 사진과 블랙박스를 확보하세요.",
-    "측면충돌": "과실 비율이 상황에 따라 달라집니다. 상대 차선 변경 여부를 확인하세요."
-}
+# 예시 지원금 규칙 (실제론 더 복잡할 수 있어요)
+support_rules = [
+    {
+        "조건": lambda u: u.age >= 65,
+        "혜택": "노인 복지 지원금: 월 20만원"
+    },
+    {
+        "조건": lambda u: u.income < 3000,
+        "혜택": "저소득층 지원금: 월 30만원"
+    },
+    {
+        "조건": lambda u: u.job == "농업",
+        "혜택": "농업인 지원금: 월 25만원"
+    },
+    {
+        "조건": lambda u: u.region == "서울",
+        "혜택": "서울시 지역 지원금: 월 15만원"
+    }
+]
 
-@app.get("/")
-async def root():
-    return {"message": "🚗 안녕하세요! 교통사고 진행 도우미입니다."}
-
-@app.post("/accident")
-async def process_accident(req: AccidentRequest):
-    result = rules.get(req.type, "해당 사고 유형은 아직 준비 중입니다.")
-    return {"response": result}
+@app.post("/support")
+async def get_support_info(user: UserInfo):
+    benefits = [rule["혜택"] for rule in support_rules if rule["조건"](user)]
+    if not benefits:
+        return {"message": "해당 조건에 맞는 지원금이 없습니다."}
+    return {"support_benefits": benefits}
